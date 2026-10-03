@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f8d8e3">
+  <meta name="description" content="A digital welcome card for Raja NurAmeena Safiya.">
+  <title>Welcome, Raja NurAmeena Safiya</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23f9d8e3'/%3E%3Cpath d='M32 50C17 39 11 33 11 23c0-8 6-13 13-13 4 0 7 2 8 6 2-4 5-6 9-6 7 0 13 5 13 13 0 10-7 16-22 27z' fill='%23b73f75'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #55254f;
+      --rose: #ba3e74;
+      --paper: #fff9f1;
+      --blush: #f8cbd8;
+      --lavender: #dac8ff;
+      --peach: #ffd6b6;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 12% 10%, rgba(255,255,255,.92), transparent 24%),
+        radial-gradient(circle at 88% 8%, rgba(255,227,238,.9), transparent 26%),
+        linear-gradient(145deg, #f6d3df 0%, #eadcff 48%, #ffe0c7 100%);
+      font-family: "Avenir Next", "Trebuchet MS", system-ui, sans-serif;
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+      padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+    }
+
+    .card-shell {
+      position: relative;
+      width: min(94vw, calc(94vh * 5 / 7));
+      aspect-ratio: 5 / 7;
+      border-radius: clamp(22px, 5vw, 48px);
+      overflow: hidden;
+      background: var(--paper);
+      box-shadow: 0 32px 80px rgba(72, 32, 69, .3), 0 8px 24px rgba(72, 32, 69, .18);
+      isolation: isolate;
+    }
+
+    .card-shell::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 50;
+      pointer-events: none;
+      border: clamp(5px, 1vw, 10px) solid rgba(255,255,255,.88);
+      border-radius: inherit;
+      box-shadow: inset 0 0 0 2px rgba(240, 159, 184, .38);
+    }
+
+    .base-card,
+    .scene,
+    .final-card {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .base-card {
+      object-fit: cover;
+      opacity: .16;
+      transform: scale(1.06);
+      filter: blur(1px) saturate(.85);
+    }
+
+    .veil {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255,249,241,.38), rgba(255,249,241,.82));
+    }
+
+    .scene {
+      z-index: 4;
+      display: grid;
+      align-content: center;
+      justify-items: center;
+      padding: 6.5%;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .photo-frame {
+      overflow: hidden;
+      background: white;
+      border: clamp(5px, 1.1vw, 10px) solid white;
+      outline: clamp(4px, .8vw, 8px) solid rgba(239, 174, 201, .72);
+      box-shadow: 0 18px 35px rgba(83, 37, 79, .22);
+    }
+
+    .photo-frame img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .baby-frame {
+      width: 90%;
+      aspect-ratio: 1.38;
+      border-radius: 24% 24% 18% 18% / 28% 28% 18% 18%;
+    }
+
+    .baby-frame img { object-position: center 46%; }
+
+    .ribbon {
+      width: 96%;
+      margin-top: 5%;
+      padding: 4.5% 5%;
+      border-radius: 999px;
+      background: rgba(255, 249, 241, .96);
+      border: 2px solid rgba(238, 174, 199, .66);
+      box-shadow: 0 14px 30px rgba(83, 37, 79, .15);
+      text-align: center;
+    }
+
+    .eyebrow {
+      margin: 0 0 1.6%;
+      color: var(--rose);
+      font-size: clamp(14px, 3.2vw, 28px);
+      font-weight: 850;
+      letter-spacing: .11em;
+    }
+
+    h1 {
+      margin: 0;
+      color: #6b2b62;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(28px, 6.8vw, 61px);
+      font-style: italic;
+      line-height: 1.04;
+    }
+
+    .family-frame {
+      width: 90%;
+      aspect-ratio: 1.05;
+      border-radius: 22% 22% 18% 18%;
+    }
+
+    .family-frame img { object-position: center; }
+
+    .family-title {
+      grid-column: 1 / -1;
+      margin-bottom: 4%;
+      padding: 3% 9%;
+      color: var(--rose);
+      background: rgba(255, 249, 241, .92);
+      border-radius: 999px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(25px, 5.7vw, 52px);
+      font-style: italic;
+      box-shadow: 0 12px 28px rgba(83, 37, 79, .14);
+    }
+
+    .final-card {
+      z-index: 12;
+      object-fit: cover;
+      opacity: 0;
+      transform: scale(1.06);
+    }
+
+    .sparkles {
+      position: absolute;
+      inset: 0;
+      z-index: 24;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .sparkles span {
+      position: absolute;
+      color: white;
+      font-size: clamp(18px, 4vw, 38px);
+      text-shadow: 0 0 14px rgba(255,255,255,.98), 0 2px 8px rgba(187,63,116,.42);
+      opacity: 0;
+    }
+
+    .sparkles span:nth-child(1) { left: 8%; top: 12%; }
+    .sparkles span:nth-child(2) { right: 9%; top: 22%; }
+    .sparkles span:nth-child(3) { left: 13%; top: 61%; }
+    .sparkles span:nth-child(4) { right: 11%; top: 72%; }
+    .sparkles span:nth-child(5) { left: 47%; top: 45%; }
+    .sparkles span:nth-child(6) { left: 40%; top: 88%; }
+
+    .replay {
+      position: absolute;
+      z-index: 70;
+      right: 4%;
+      bottom: 3%;
+      display: grid;
+      place-items: center;
+      width: clamp(38px, 8vw, 58px);
+      aspect-ratio: 1;
+      border: 2px solid rgba(255,255,255,.92);
+      border-radius: 50%;
+      color: white;
+      background: rgba(89, 38, 81, .62);
+      box-shadow: 0 8px 20px rgba(58, 22, 53, .25);
+      font-size: clamp(20px, 4.2vw, 34px);
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+    }
+
+    .download-card {
+      position: absolute;
+      z-index: 70;
+      left: 4%;
+      bottom: 3%;
+      display: inline-flex;
+      align-items: center;
+      min-height: clamp(38px, 8vw, 58px);
+      padding: 0 clamp(14px, 3vw, 24px);
+      border: 2px solid rgba(255,255,255,.92);
+      border-radius: 999px;
+      color: white;
+      background: rgba(89, 38, 81, .72);
+      box-shadow: 0 8px 20px rgba(58, 22, 53, .25);
+      font-size: clamp(13px, 2.6vw, 20px);
+      font-weight: 800;
+      text-decoration: none;
+      backdrop-filter: blur(8px);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .replay:focus-visible { outline: 4px solid #fff; outline-offset: 4px; }
+
+    .playing .scene-baby { animation: babyScene 16s infinite both; }
+    .playing .scene-families { animation: familyScene 16s infinite both; }
+    .playing .final-card { animation: finalScene 16s infinite both; }
+    .playing .download-card { animation: finalActions 16s infinite both; }
+    .playing .baby-frame { animation: gentleFloat 4.8s ease-in-out infinite; }
+    .playing .family-frame { animation: familyReveal 16s infinite both; }
+    .playing .sparkles span { animation: sparkle 3.2s ease-in-out infinite; }
+    .playing .sparkles span:nth-child(2) { animation-delay: .6s; }
+    .playing .sparkles span:nth-child(3) { animation-delay: 1.1s; }
+    .playing .sparkles span:nth-child(4) { animation-delay: 1.7s; }
+    .playing .sparkles span:nth-child(5) { animation-delay: 2.2s; }
+    .playing .sparkles span:nth-child(6) { animation-delay: 2.7s; }
+
+    @keyframes babyScene {
+      0% { opacity: 0; transform: scale(.94); }
+      5%, 30% { opacity: 1; transform: scale(1); }
+      37%, 100% { opacity: 0; transform: scale(1.025); }
+    }
+
+    @keyframes familyScene {
+      0%, 31% { opacity: 0; transform: translateY(4%); }
+      38%, 61% { opacity: 1; transform: translateY(0); }
+      68%, 100% { opacity: 0; transform: translateY(-2%); }
+    }
+
+    @keyframes finalScene {
+      0%, 61% { opacity: 0; transform: scale(1.08); }
+      68%, 93% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(.985); }
+    }
+
+    @keyframes finalActions {
+      0%, 67% { opacity: 0; pointer-events: none; transform: translateY(10px); }
+      72%, 95% { opacity: 1; pointer-events: auto; transform: translateY(0); }
+      100% { opacity: 0; pointer-events: none; }
+    }
+
+    @keyframes gentleFloat {
+      0%, 100% { transform: translateY(0) rotate(-.25deg); }
+      50% { transform: translateY(-1.5%) rotate(.25deg); }
+    }
+
+    @keyframes familyReveal {
+      0%, 32% { transform: translateY(10%) scale(.9); }
+      41%, 61% { transform: translateY(0) scale(1); }
+      100% { transform: translateX(0); }
+    }
+
+    @keyframes sparkle {
+      0%, 100% { opacity: 0; transform: translateY(12px) scale(.6) rotate(0); }
+      45% { opacity: .95; transform: translateY(-5px) scale(1.15) rotate(18deg); }
+      70% { opacity: .45; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .scene, .base-card, .veil, .sparkles { display: none; }
+      .final-card { opacity: 1; transform: none; }
+      .download-card { opacity: 1; pointer-events: auto; }
+    }
+  </style>
+</head>
+<body>
+  <main class="card-shell playing" id="card" aria-label="Animated welcome card for Raja NurAmeena Safiya">
+    <img class="base-card" src="assets/full-card.png" alt="" aria-hidden="true">
+    <div class="veil" aria-hidden="true"></div>
+
+    <section class="scene scene-baby" aria-label="Welcome, Raja NurAmeena Safiya">
+      <div class="photo-frame baby-frame">
+        <img src="assets/animated-baby.png" alt="Animated illustration of a sleeping newborn baby girl">
+      </div>
+      <div class="ribbon">
+        <p class="eyebrow">WELCOME TO THE WORLD</p>
+        <h1>Raja NurAmeena Safiya</h1>
+      </div>
+    </section>
+
+    <section class="scene scene-families" aria-label="A welcome from both families">
+      <div class="family-title">A warm welcome</div>
+      <div class="photo-frame family-frame">
+        <img src="assets/animated-family.png" alt="Animated illustration of a family welcoming a newborn">
+      </div>
+    </section>
+
+    <img class="final-card" src="assets/full-card.png" alt="The complete welcome card for Raja NurAmeena Safiya">
+
+    <div class="sparkles" aria-hidden="true">
+      <span>✦</span><span>✧</span><span>✦</span><span>✧</span><span>✦</span><span>✧</span>
+    </div>
+
+    <a class="download-card" href="assets/Raja-NurAmeena-Safiya-card.jpg" download="Raja-NurAmeena-Safiya-card.jpg">Download JPG</a>
+    <button class="replay" id="replay" type="button" aria-label="Replay card animation">↻</button>
+  </main>
+
+  <script>
+    const card = document.getElementById('card');
+    document.getElementById('replay').addEventListener('click', () => {
+      card.classList.remove('playing');
+      void card.offsetWidth;
+      card.classList.add('playing');
+    });
+  </script>
+</body>
+</html>
