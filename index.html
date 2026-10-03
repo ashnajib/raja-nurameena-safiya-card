@@ -234,6 +234,103 @@
       pointer-events: none;
     }
 
+    .sound-toggle {
+      position: absolute;
+      z-index: 70;
+      left: 4%;
+      top: 3%;
+      display: grid;
+      place-items: center;
+      width: clamp(38px, 8vw, 58px);
+      aspect-ratio: 1;
+      border: 2px solid rgba(255,255,255,.92);
+      border-radius: 50%;
+      color: white;
+      background: rgba(89, 38, 81, .62);
+      box-shadow: 0 8px 20px rgba(58, 22, 53, .25);
+      font-size: clamp(17px, 3.6vw, 29px);
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .45s ease, transform .2s ease;
+    }
+
+    .started .sound-toggle { opacity: 1; pointer-events: auto; }
+    .sound-toggle:active { transform: scale(.92); }
+
+    .start-screen {
+      position: absolute;
+      inset: 0;
+      z-index: 90;
+      display: grid;
+      place-items: center;
+      padding: 10%;
+      text-align: center;
+      background:
+        radial-gradient(circle at 50% 30%, rgba(255,255,255,.9), transparent 35%),
+        linear-gradient(155deg, rgba(248,203,216,.88), rgba(218,200,255,.9) 54%, rgba(255,214,182,.9));
+      transition: opacity .7s ease, visibility .7s ease;
+    }
+
+    .started .start-screen {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .start-panel {
+      width: min(92%, 430px);
+      padding: 12% 8%;
+      border: clamp(5px, 1.1vw, 9px) solid rgba(255,255,255,.82);
+      border-radius: 30% 30% 24% 24% / 18% 18% 22% 22%;
+      background: rgba(255,249,241,.88);
+      box-shadow: 0 24px 55px rgba(83,37,79,.24);
+      backdrop-filter: blur(12px);
+    }
+
+    .start-icon {
+      display: block;
+      margin-bottom: 5%;
+      font-size: clamp(42px, 11vw, 82px);
+      filter: drop-shadow(0 8px 12px rgba(183,63,117,.18));
+    }
+
+    .start-title {
+      margin: 0;
+      color: #6b2b62;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(28px, 7vw, 56px);
+      font-style: italic;
+      line-height: 1.06;
+    }
+
+    .start-copy {
+      margin: 4% 0 8%;
+      color: #7a416e;
+      font-size: clamp(14px, 3.1vw, 22px);
+      font-weight: 700;
+      letter-spacing: .02em;
+    }
+
+    .open-card {
+      min-height: 52px;
+      padding: 0 26px;
+      border: 0;
+      border-radius: 999px;
+      color: white;
+      background: linear-gradient(135deg, #b83f76, #7b396f);
+      box-shadow: 0 12px 25px rgba(103,43,93,.28);
+      font: inherit;
+      font-size: clamp(16px, 3.4vw, 22px);
+      font-weight: 850;
+      cursor: pointer;
+    }
+
+    .open-card:active { transform: translateY(2px) scale(.98); }
+    .open-card:focus-visible,
+    .sound-toggle:focus-visible { outline: 4px solid #fff; outline-offset: 4px; }
+
     .replay:focus-visible { outline: 4px solid #fff; outline-offset: 4px; }
 
     .playing .scene-baby { animation: babyScene 16s infinite both; }
@@ -298,7 +395,7 @@
   </style>
 </head>
 <body>
-  <main class="card-shell playing" id="card" aria-label="Animated welcome card for Raja NurAmeena Safiya">
+  <main class="card-shell" id="card" aria-label="Animated welcome card for Raja NurAmeena Safiya">
     <img class="base-card" src="assets/full-card.png" alt="" aria-hidden="true">
     <div class="veil" aria-hidden="true"></div>
 
@@ -326,15 +423,149 @@
     </div>
 
     <a class="download-card" href="assets/Raja-NurAmeena-Safiya-card.jpg" download="Raja-NurAmeena-Safiya-card.jpg">Download JPG</a>
+    <button class="sound-toggle" id="sound-toggle" type="button" aria-label="Mute music" aria-pressed="false">♫</button>
     <button class="replay" id="replay" type="button" aria-label="Replay card animation">↻</button>
+
+    <div class="start-screen" id="start-screen">
+      <div class="start-panel">
+        <span class="start-icon" aria-hidden="true">🎀</span>
+        <p class="start-title">A little surprise for Ameena</p>
+        <p class="start-copy">Tap to open with music</p>
+        <button class="open-card" id="open-card" type="button">Open the card ♫</button>
+      </div>
+    </div>
   </main>
 
   <script>
     const card = document.getElementById('card');
-    document.getElementById('replay').addEventListener('click', () => {
+    const openButton = document.getElementById('open-card');
+    const soundButton = document.getElementById('sound-toggle');
+    const replayButton = document.getElementById('replay');
+
+    let audioContext;
+    let masterGain;
+    let phraseTimer;
+    let musicOn = true;
+    const activeVoices = new Set();
+    const phraseLength = 16;
+
+    const notes = {
+      G3: 196.00, A3: 220.00, B3: 246.94,
+      C4: 261.63, D4: 293.66, E4: 329.63, F4: 349.23, G4: 392.00, A4: 440.00, B4: 493.88,
+      C5: 523.25, D5: 587.33, E5: 659.25, F5: 698.46, G5: 783.99
+    };
+
+    const melody = [
+      [0, 'C5', .72], [1, 'E5', .72], [2, 'G5', 1.55],
+      [4, 'E5', .72], [5, 'D5', .72], [6, 'C5', 1.7],
+      [8, 'G4', .72], [9, 'C5', .72], [10, 'E5', 1.55],
+      [12, 'D5', .72], [13, 'C5', .72], [14, 'G4', 1.7]
+    ];
+
+    const harmony = [
+      [0, ['C4', 'E4', 'G4']],
+      [4, ['F4', 'A4', 'C5']],
+      [8, ['A3', 'C4', 'E4']],
+      [12, ['G3', 'B3', 'D4']]
+    ];
+
+    function remember(oscillator) {
+      activeVoices.add(oscillator);
+      oscillator.addEventListener('ended', () => activeVoices.delete(oscillator), { once: true });
+    }
+
+    function musicBoxNote(time, frequency, duration, volume = .16) {
+      const gain = audioContext.createGain();
+      const bell = audioContext.createOscillator();
+      const shimmer = audioContext.createOscillator();
+      bell.type = 'sine';
+      shimmer.type = 'triangle';
+      bell.frequency.setValueAtTime(frequency, time);
+      shimmer.frequency.setValueAtTime(frequency * 2.01, time);
+      gain.gain.setValueAtTime(.0001, time);
+      gain.gain.exponentialRampToValueAtTime(volume, time + .025);
+      gain.gain.exponentialRampToValueAtTime(.0001, time + duration);
+      bell.connect(gain);
+      shimmer.connect(gain);
+      gain.connect(masterGain);
+      bell.start(time);
+      shimmer.start(time);
+      bell.stop(time + duration + .05);
+      shimmer.stop(time + duration + .05);
+      remember(bell);
+      remember(shimmer);
+    }
+
+    function softChord(time, chord) {
+      chord.forEach((name, index) => musicBoxNote(time + index * .035, notes[name], 3.7, .035));
+    }
+
+    function schedulePhrase(startTime) {
+      melody.forEach(([offset, name, duration]) => musicBoxNote(startTime + offset, notes[name], duration));
+      harmony.forEach(([offset, chord]) => softChord(startTime + offset, chord));
+    }
+
+    function stopVoices() {
+      activeVoices.forEach(voice => {
+        try { voice.stop(); } catch (_) {}
+      });
+      activeVoices.clear();
+    }
+
+    async function ensureAudio() {
+      if (!audioContext) {
+        const AudioEngine = window.AudioContext || window.webkitAudioContext;
+        audioContext = new AudioEngine();
+        masterGain = audioContext.createGain();
+        masterGain.gain.value = .42;
+        masterGain.connect(audioContext.destination);
+      }
+      if (audioContext.state === 'suspended') await audioContext.resume();
+    }
+
+    async function startMusic() {
+      await ensureAudio();
+      clearInterval(phraseTimer);
+      stopVoices();
+      masterGain.gain.cancelScheduledValues(audioContext.currentTime);
+      masterGain.gain.setTargetAtTime(.42, audioContext.currentTime, .05);
+      schedulePhrase(audioContext.currentTime + .08);
+      phraseTimer = setInterval(() => schedulePhrase(audioContext.currentTime + .05), phraseLength * 1000);
+    }
+
+    function stopMusic() {
+      clearInterval(phraseTimer);
+      stopVoices();
+      if (masterGain && audioContext) {
+        masterGain.gain.cancelScheduledValues(audioContext.currentTime);
+        masterGain.gain.setTargetAtTime(.0001, audioContext.currentTime, .03);
+      }
+    }
+
+    function restartAnimation() {
       card.classList.remove('playing');
       void card.offsetWidth;
       card.classList.add('playing');
+    }
+
+    openButton.addEventListener('click', async () => {
+      card.classList.add('started');
+      restartAnimation();
+      if (musicOn) await startMusic();
+    });
+
+    soundButton.addEventListener('click', async () => {
+      musicOn = !musicOn;
+      soundButton.textContent = musicOn ? '♫' : '♪̸';
+      soundButton.setAttribute('aria-label', musicOn ? 'Mute music' : 'Play music');
+      soundButton.setAttribute('aria-pressed', String(!musicOn));
+      if (musicOn) await startMusic();
+      else stopMusic();
+    });
+
+    replayButton.addEventListener('click', async () => {
+      restartAnimation();
+      if (musicOn) await startMusic();
     });
   </script>
 </body>
